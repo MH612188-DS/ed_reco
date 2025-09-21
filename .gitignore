@@ -1,0 +1,24 @@
+# --- Flutter Web ---
+learning_styles_app/.dart_tool/
+learning_styles_app/build/
+learning_styles_app/ios/
+learning_styles_app/android/
+learning_styles_app/macos/
+learning_styles_app/windows/
+learning_styles_app/linux/
+# keep only lib/, pubspec.*, web/ etc.
+
+# --- Python / API ---
+api/__pycache__/
+api/.venv/
+api/.env
+api/reco_logs/
+
+# Generated analysis/preview files (keep models, ignore reports)
+api/models_bundles/*.png
+api/models_bundles/*.csv
+api/models_bundles/*.xlsx
+api/models_bundles/report.html
+
+# Bytecode
+*.pyc

@@ -1,0 +1,2 @@
+api/models_bundles/*.joblib filter=lfs diff=lfs merge=lfs -text
+api/models_bundles/*.json filter=lfs diff=lfs merge=lfs -text

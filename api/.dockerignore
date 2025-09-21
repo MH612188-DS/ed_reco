@@ -1,0 +1,15 @@
+# Keep sources available to docker build; do NOT put '*' here.
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.swp
+*.log
+.venv/
+env/
+build/
+dist/
+.idea/
+.vscode/
+.DS_Store
+.git/
