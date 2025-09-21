@@ -24,6 +24,10 @@ SCHEMA_PATH = os.environ.get("SCHEMA_PATH", str(Path(MODEL_DIR) / "feature_colum
 
 app = FastAPI(title="Style Recommender Inference API", version="1.1.0")
 
+@app.get("/")
+def read_root():
+    return {"message": "Welcome to Style Recommender API 🚀"}
+
 # --- CORS (allow local dev; tighten for prod) ---
 app.add_middleware(
     CORSMiddleware,
