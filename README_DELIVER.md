@@ -1,185 +1,276 @@
+# 🎓 EDU_BUDDY — Quickstart & Runbook
 
-EDU_BUDDY — README_DELIVER.md (Delivery / Quickstart & Runbook)
-EDU_BUDDY — README_DELIVER.md (Delivery / Quickstart & Runbook)
+A step-by-step guide for running, building, and deploying the EDU_BUDDY project (API & Flutter web app). Written for beginners—just follow along!
 
-This file explains exactly how to run the project locally, how to build the Flutter web bundle, and how to deploy the API to Render and the frontend to Netlify.
-It's written so a non-expert can follow step-by-step. Follow the Windows instructions unless you are on macOS/Linux (Bash commands are provided).
+---
 
-Quick summary (one-line)
+## 🚀 Quick Summary
 
-•	Start backend: create venv → install requirements → uvicorn app:app --host 0.0.0.0 --port 8000
-•	Build frontend: flutter build web --release --dart-define=API_BASE=https://<your-render-url>
-•	Serve the build locally: python -m http.server 8080 (from learning_styles_app/build/web)
-•	Deploy backend to Render (rootDir = api, build: pip install -r requirements.txt, start: uvicorn app:app --host 0.0.0.0 --port 10000)
-•	Deploy frontend to Netlify (drag/drop build/web or Netlify Git build)
+- **Start backend:**  
+  `python -m venv .venv` → `pip install -r requirements.txt` → `uvicorn app:app --host 0.0.0.0 --port 8000`
+- **Build frontend:**  
+  `flutter build web --release --dart-define=API_BASE=https://<your-render-url>`
+- **Serve locally:**  
+  `python -m http.server 8080` (from `learning_styles_app/build/web`)
+- **Deploy backend:**  
+  Render (see below)
+- **Deploy frontend:**  
+  Netlify (see below)
 
-0 — Requirements (install first)
+---
 
-Install these before attempting to run:
-•	Git — https://git-scm.com
-•	Python 3.11+ — https://www.python.org
-•	pip (comes with Python)
-•	Flutter SDK — https://flutter.dev (for building web)
-•	Node.js & npm (optional; for Netlify CLI) — https://nodejs.org
-•	Docker Desktop (optional; for running the API in Docker) — https://www.docker.com
-•	Netlify account (optional) — https://app.netlify.com
-•	Render account — https://dashboard.render.com
-•	A code editor (VS Code recommended)
-•	A modern browser (Chrome recommended for dev tools)
+## 🧰 Requirements
 
-1 — Before you start: important repo hygiene
+Install these first:
 
-1.	Ensure .gitignore contains:
-2.	# virtual envs
-3.	.venv/
-4.	venv/
-5.	api/.venv/
-6.	learning_styles_app/.dart_tool/
-7.	learning_styles_app/build/
-8.	Do not commit  .venv or build artifacts (unless you intend to deliver the learning_styles_app/build/web bundle).
-9.	Make sure api/models_bundles/ is included and contains your model files — the API needs these.
+- [Git](https://git-scm.com)
+- [Python 3.11+](https://www.python.org)
+- pip (comes with Python)
+- [Flutter SDK](https://flutter.dev)
+- [Node.js & npm](https://nodejs.org) _(optional: Netlify CLI)_
+- [Docker Desktop](https://www.docker.com) _(optional)_
+- Netlify account _(optional)_: [Sign up](https://app.netlify.com)
+- Render account: [Sign up](https://dashboard.render.com)
+- Code editor _(VS Code recommended)_
+- Modern browser _(Chrome recommended)_
 
-2 — Running the API locally (Windows — PowerShell)
+---
 
-Open PowerShell and run these commands from the repo root.
-Step A — create & activate venv (once)
+## 🧹 Repo Hygiene
+
+- Ensure `.gitignore` contains:
+  ```
+  # virtual envs
+  .venv/
+  venv/
+  api/.venv/
+  learning_styles_app/.dart_tool/
+  learning_styles_app/build/
+  ```
+- **Do not commit:** `.venv` or build artifacts (unless delivering `learning_styles_app/build/web`)
+- **Models:** Verify `api/models_bundles/` exists and contains model files.
+
+---
+
+## 🏗️ Running the API Locally
+
+### On Windows (PowerShell):
+
+```powershell
 cd C:\path\to\edu_buddy\api
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-Step B — install dependencies
-If you shipped a wheels/ directory (faster):
-pip install --upgrade pip
-pip install --no-index --find-links=./wheels -r requirements.txt
-Otherwise:
 pip install --upgrade pip
 pip install -r requirements.txt
-Step C — (optional) set model path env var (session)
+
+# (Optional) set model env vars
 $env:MODEL_DIR = (Resolve-Path .\models_bundles).Path
-$env:SCHEMA_PATH = (Resolve-Path .\models_bundles\feature_columns.json).Path  # if used by your code
-Step D — run the API
+$env:SCHEMA_PATH = (Resolve-Path .\models_bundles\feature_columns.json).Path
+
+# Run API
 uvicorn app:app --host 0.0.0.0 --port 8000 --reload
-•	Visit http://localhost:8000/health to verify the API is up.
-•	Visit http://localhost:8000/docs for FastAPI interactive docs (if present).
+```
 
-3 — Running the API locally (macOS / Linux — Bash)
+- Visit [http://localhost:8000/health](http://localhost:8000/health) (API health)
+- Visit [http://localhost:8000/docs](http://localhost:8000/docs) (FastAPI docs)
 
+---
+
+### On macOS / Linux (Bash):
+
+```bash
 cd /path/to/edu_buddy/api
 python3 -m venv .venv
 source .venv/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
-export MODEL_DIR="$(pwd)/models_bundles"
-export SCHEMA_PATH="$(pwd)/models_bundles/feature_columns.json"  # if used
-uvicorn app:app --host 0.0.0.0 --port 8000 --reload
 
-4 — (Optional) Running API in Docker (recommended for parity)
-From the repo root (where api/Dockerfile is located):
-Build:
-cd C:\path\to\edu_buddy
+export MODEL_DIR="$(pwd)/models_bundles"
+export SCHEMA_PATH="$(pwd)/models_bundles/feature_columns.json"
+
+uvicorn app:app --host 0.0.0.0 --port 8000 --reload
+```
+
+---
+
+## 🐳 (Optional) Run API in Docker
+
+From repo root (where `api/Dockerfile` exists):
+
+```bash
+cd /path/to/edu_buddy
 docker build -t edreco-api -f api/Dockerfile .
-Run (mount models into container):
-docker run --rm -p 8000:8000 -e MODEL_DIR=/models -v "${PWD}\api\models_bundles:/models" edreco-api
-•	The container will run uvicorn (depending on your Dockerfile). Adjust the port if needed.
-5 — Flutter: run dev & build web
-•	5.1 Development run (hot reload)
-Open a new terminal window and run:
-cd C:\path\to\edu_buddy\learning_styles_app
+docker run --rm -p 8000:8000 -e MODEL_DIR=/models -v "${PWD}/api/models_bundles:/models" edreco-api
+```
+
+---
+
+## 💻 Flutter Frontend
+
+### Development (hot reload)
+
+```bash
+cd /path/to/edu_buddy/learning_styles_app
 flutter clean
 flutter pub get
 flutter run -d web-server --dart-define=API_BASE=http://localhost:8000
-•	This opens a Chrome window with the Flutter app pointing to your local backend.
+```
+- Opens Chrome with app using your local backend.
 
-5.2 Build production web bundle
-Decide whether you want the built frontend to call the local API or the deployed Render API:
-•	To target the deployed Render API (recommended when preparing the delivery):
-•	cd learning_styles_app
-•	flutter clean
-•	flutter pub get
-•	flutter build web --release --dart-define=API_BASE=https://ed-reco.onrender.com
-Replace https://ed-reco.onrender.com with your actual Render URL.
-•	To target local API for production-like testing:
-•	flutter build web --release --dart-define=API_BASE=http://localhost:8000
-Output folder: learning_styles_app/build/web/
-________________________________________
-6 — Serve the built web locally (quick test)
-From the built web folder:
-cd learning_styles_app\build\web
+---
+
+### Production Build
+
+- **To target deployed API:**  
+  Replace with your Render URL.
+
+  ```bash
+  cd learning_styles_app
+  flutter clean
+  flutter pub get
+  flutter build web --release --dart-define=API_BASE=https://ed-reco.onrender.com
+  ```
+- **To target local API:**  
+  ```bash
+  flutter build web --release --dart-define=API_BASE=http://localhost:8000
+  ```
+
+- Output: `learning_styles_app/build/web/`
+
+---
+
+## 🌐 Serve Built Frontend Locally
+
+```bash
+cd learning_styles_app/build/web
 python -m http.server 8080
-# Open: http://localhost:8080
-Or use Docker nginx:
+# Open http://localhost:8080
+```
+**Or** (Docker nginx):
+
+```bash
 docker run --rm -p 8080:80 -v "${PWD}:/usr/share/nginx/html:ro" nginx:alpine
-________________________________________
-7 — Deploy the API to Render (UI steps)
-(A) Create a Render account and connect to your GitHub repo.
-(B) Create a new Web Service:
-•	Environment: Python 3
-•	Root Directory: api
-•	Build Command: pip install -r requirements.txt
-(or: pip install --no-index --find-links=./wheels -r requirements.txt if you included wheels/)
-•	Start Command: uvicorn app:app --host 0.0.0.0 --port 10000
-•	Health check path: /health
-•	Plan: free (or higher if you need)
-•	Set environment variables: if your app expects MODEL_DIR or SCHEMA_PATH, set them in the Render service env vars. Example:
-o	MODEL_DIR = /opt/render/project/src/api/models_bundles
-o	SCHEMA_PATH = /opt/render/project/src/api/models_bundles/feature_columns.json
-Deploy — after build you’ll get a URL like https://ed-reco.onrender.com. Use that as API_BASE for frontend builds.
-Alternative: Use the render.yaml (if included). Render will use those settings automatically when creating the service with the "Use render.yaml" option.
-________________________________________
-8 — Deploy the frontend to Netlify
-A — Drag & drop (fast)
-•	1.	Build the web bundle (see Step 5.2).
-•	2.	Go to Netlify → New site from drag & drop → upload the contents of learning_styles_app/build/web.
-•	3.	Netlify gives you a site URL.
-B — Git-based (recommended)
-•	1.	Connect Netlify to your GitHub repo.
-•	2.	Set the site build settings:
-o	Base directory: learning_styles_app
-o	Build command:
-o	flutter build web --release --dart-define=API_BASE=https://ed-reco.onrender.com
-o	Publish directory: learning_styles_app/build/web
-1.	Netlify will run that build and publish automatically on each push.
-Important: If your Flutter project uses --dart-define=API_BASE=..., ensure the Netlify build command includes the correct Render URL.
-________________________________________
-9 — What to open & when (non-technical guide)
-•	When setting up locally:
-o	Open PowerShell / Terminal A: run the backend (API).
-o	Open PowerShell / Terminal B: run Flutter dev or build the web bundle.
-o	Open Browser (Chrome): use it to open http://localhost:8080 (frontend), http://localhost:8000/health (backend health), and http://localhost:8000/docs (API docs).
-When deploying:
-o	Log in to Render to watch the API deploy logs.
-o	Log in to Netlify to watch the frontend deploy logs.
-________________________________________
-10 — Troubleshooting (common issues)
-A. ClientException: Failed to fetch in Flutter web
-•	•	Usually the frontend cannot reach the API or CORS blocked.
-•	•	Fixes:
-•	1.	Ensure you built the frontend with the correct API_BASE (--dart-define).
-•	2.	Ensure the API is reachable (test curl http://localhost:8000/health).
-•	3.	If CORS errors appear in browser console, ensure app.py has correct CORS middleware:
-•	4.	from fastapi.middleware.cors import CORSMiddleware
-•	5.	app.add_middleware(
-•	6.	    CORSMiddleware,
-•	7.	    allow_origins=["*"],   # dev only - restrict in prod
-•	8.	    allow_credentials=True,
-•	9.	    allow_methods=["*"],
-•	10.	    allow_headers=["*"],
-•	11.	)
-B. 404 on / after deploy
-•	•	Add a root route to api/app.py:
-•	•	@app.get("/")
-•	•	def read_root():
-•	•	    return {"message": "Welcome to Style Recommender API"}
-C. Git push rejected due to large files
-•	•	Do not commit .venv or .dll files. Add .venv/ to .gitignore. If large files are already committed, remove them from history (use git filter-repo or start a fresh repo).
-D. Render build says “no Dockerfile” or expects Docker
-•	•	If you created a Docker service, ensure a Dockerfile exists in repo root. If you want to use Render's Python environment instead, create the service as a Python service and set rootDir=api.
-E. Models not found at runtime
-•	•	Ensure MODEL_DIR is correctly set for your runtime:
-o	Locally: set $env:MODEL_DIR before running uvicorn.
-o	On Render: configure MODEL_DIR environment variable to point to api/models_bundles.
-________________________________________
-11 — Useful commands (copy/paste)
-Backend (Windows PowerShell)
+```
+
+---
+
+## 🚢 Deploy Backend to Render
+
+1. **Create account & connect GitHub repo**
+2. **New Web Service:**
+   - Environment: Python 3
+   - Root Directory: `api`
+   - Build Command:  
+     `pip install -r requirements.txt`  
+     _(or `pip install --no-index --find-links=./wheels -r requirements.txt` if using wheels)_
+   - Start Command:  
+     `uvicorn app:app --host 0.0.0.0 --port 10000`
+   - Health Check Path: `/health`
+   - Set environment variables if needed:
+     ```
+     MODEL_DIR = /opt/render/project/src/api/models_bundles
+     SCHEMA_PATH = /opt/render/project/src/api/models_bundles/feature_columns.json
+     ```
+3. **Get your API URL** (e.g., `https://ed-reco.onrender.com`)
+4. **Alternative:**  
+   Use `render.yaml` if included.
+
+---
+
+## 🚀 Deploy Frontend to Netlify
+
+### **A. Drag & Drop**
+
+1. Build web bundle (see above).
+2. Go to Netlify → New site from drag & drop → upload contents of `learning_styles_app/build/web`.
+3. Netlify gives you a site URL.
+
+### **B. Git-based (recommended):**
+
+1. Connect Netlify to GitHub.
+2. Site build settings:
+   - Base directory: `learning_styles_app`
+   - Build command:  
+     `flutter build web --release --dart-define=API_BASE=https://ed-reco.onrender.com`
+   - Publish directory: `learning_styles_app/build/web`
+3. Netlify builds & publishes on every push.
+
+**Important:**  
+If using `--dart-define=API_BASE=...`, set correct Render URL in Netlify build command!
+
+---
+
+## 🗂️ What to Open (When)
+
+- **Local setup:**  
+  - PowerShell/Terminal A: run backend (API)
+  - PowerShell/Terminal B: run Flutter dev/build web bundle
+  - Browser:  
+    - [http://localhost:8080](http://localhost:8080) (frontend)  
+    - [http://localhost:8000/health](http://localhost:8000/health) (backend health)  
+    - [http://localhost:8000/docs](http://localhost:8000/docs) (API docs)
+- **Deployment:**  
+  - Log in to Render (API deploy logs)
+  - Log in to Netlify (frontend deploy logs)
+
+---
+
+## 🛠️ Troubleshooting
+
+### **A. Flutter web: `ClientException: Failed to fetch`**
+
+- **Causes:** Frontend can't reach API / CORS blocked.
+- **Fixes:**
+  1. Build frontend with correct `API_BASE`
+  2. Test API is reachable:  
+     `curl http://localhost:8000/health`
+  3. If CORS errors:  
+     Add FastAPI CORS middleware in `app.py`:
+
+     ```python
+     from fastapi.middleware.cors import CORSMiddleware
+     app.add_middleware(
+         CORSMiddleware,
+         allow_origins=["*"],      # Dev only; restrict in production
+         allow_credentials=True,
+         allow_methods=["*"],
+         allow_headers=["*"],
+     )
+     ```
+
+### **B. 404 on `/` after deploy**
+
+Add a root route in `api/app.py`:
+
+```python
+@app.get("/")
+def read_root():
+    return {"message": "Welcome to Style Recommender API"}
+```
+
+### **C. Git push rejected (large files)**
+
+- Don't commit `.venv` or `.dll` files.
+- Add `.venv/` to `.gitignore`.
+- Remove large files from history if already committed.
+
+### **D. Render build issues ("no Dockerfile")**
+
+- For Docker service: ensure `Dockerfile` exists in repo root.
+- For Python service: set rootDir=`api`.
+
+### **E. Models not found at runtime**
+
+- Locally: set `$env:MODEL_DIR` before running uvicorn.
+- On Render: configure `MODEL_DIR` env variable to point to `api/models_bundles`.
+
+---
+
+## 📝 Useful Commands
+
+**Backend (Windows PowerShell):**
+
+```powershell
 cd C:\path\to\edu_buddy\api
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
@@ -187,29 +278,53 @@ pip install --upgrade pip
 pip install -r requirements.txt
 $env:MODEL_DIR = (Resolve-Path .\models_bundles).Path
 uvicorn app:app --host 0.0.0.0 --port 8000 --reload
-Build frontend (Windows PowerShell)
+```
+
+**Build frontend:**
+
+```powershell
 cd C:\path\to\edu_buddy\learning_styles_app
 flutter clean
 flutter pub get
 flutter build web --release --dart-define=API_BASE=https://ed-reco.onrender.com
-Serve built web locally
+```
+
+**Serve built web locally:**
+
+```powershell
 cd learning_styles_app\build\web
 python -m http.server 8080
-# open http://localhost:8080
-Docker build & run (optional)
+# Open http://localhost:8080
+```
+
+**Docker build & run (optional):**
+
+```powershell
 cd C:\path\to\edu_buddy
 docker build -t edreco-api -f api/Dockerfile .
 docker run --rm -p 8000:8000 -e MODEL_DIR=/models -v "${PWD}\api\models_bundles:/models" edreco-api
-________________________________________
-12 — What I included in this delivery
-•	api/ (source code, models_bundles/, requirements.txt)
-•	learning_styles_app/build/web/ (production web bundle) 
-•	render.yaml (optional)
-•	README_DELIVER.md (this file)
-•	run_local.ps1 and run_local.sh (helper scripts) — optional
-________________________________________
-13 — Contact & support
-If you encounters issues, please provide:
-•	OS (Windows/macOS/Linux),
-•	Which step failed (commands copied and exact error output),
-•	The logs from the backend uvicorn window or Render logs.
+```
+
+---
+
+## 📦 Delivery Contents
+
+- `api/` (source code, `models_bundles/`, `requirements.txt`)
+- `learning_styles_app/build/web/` (production web bundle)
+- `render.yaml` (optional)
+- `README_DELIVER.md` (this file)
+- `run_local.ps1` and `run_local.sh` (helper scripts, optional)
+
+---
+
+## 💬 Contact & Support
+
+If you encounter issues, please provide:
+
+- OS (Windows/macOS/Linux)
+- Which step failed (commands & error output)
+- Backend logs (uvicorn or Render)
+
+---
+
+**Happy Learning! 🚀**
